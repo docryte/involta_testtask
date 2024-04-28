@@ -28,7 +28,7 @@ type Person struct {
 	ID 			int64 		`reindex:"id,,pk"`
 	FirstName	string		`reindex:"first_name"`
 	SecondName	string 		`reindex:"second_name"`
-	Username	string		`reindex:"username,,pk"`
+	Username	string		`reindex:"username,hash"`
 	Birthdate	int64		`reindex:"birthdate"`
 	Profession	string		`reindex:"profession"`
 	Jobs		[]Job 		`reindex:"jobs"`
