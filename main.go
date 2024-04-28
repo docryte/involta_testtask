@@ -4,51 +4,48 @@ import (
 	"fmt"
 	"os"
 
+	// Reindexer
 	"github.com/restream/reindexer/v3"
 	_ "github.com/restream/reindexer/v3/bindings/cproto"
 )
 
-type Location struct {
-	Country		string 		`reindex:"country"`
-	City		string 		`reindex:"city"`
-	Street		string 		`reindex:"street"`
-	Home		int			`reindex:"home"`
-	
-	Entrance	int			`reindex:"entrance"`
-	Floor		int			`reindex:"floor"`
+type Achievement struct {
+	Content	string	`reindex:"content"`
+	Date	int64	`reindex:"date"`
 }
 
-type User struct {
+type Job struct {
+	StartedAt		int64			`reindex:"started_at"`
+	EndedAt			int64			`reindex:"ended_at"`
+	Name 			string			`reindex:"name"`
+	Type 			string			`reindex:"type"`
+	Position 		string 			`reindex:"position"`
+	DismissalReason	string			`reindex:"dissmisal_reason"`
+	Achievements	[]Achievement	`reindex:"achievements"`
+}
+
+type Person struct {
 	ID 			int64 		`reindex:"id,,pk"`
+	FirstName	string		`reindex:"first_name"`
+	SecondName	string 		`reindex:"second_name"`
 	Username	string		`reindex:"username,,pk"`
-	FirstName 	string 		`reindex:"first_name"`
-	LastName 	string 		`reindex:"last_name"`
-	Location 	Location	`reindex:"location"`
+	Birthdate	int64		`reindex:"birthdate"`
+	Profession	string		`reindex:"profession"`
+	Jobs		[]Job 		`reindex:"jobs"`
+	CreatedAt 	int64		`reindex:"created_at"`
+	UpdatedAt	int64		`reindex:"updated_at"`
 }
 
 func main() {
+	// Подключение к Reindexer по ссылке из окружения и проверка подключения
 	db := reindexer.NewReindex(os.Getenv("RX_CONNECTION_URL"), reindexer.WithCreateDBIfMissing())
-	db.OpenNamespace("users", reindexer.DefaultNamespaceOptions(), User{})
-	err := db.Upsert("users", &User{
-		1,
-		"docryte",
-		"Фёдор",
-		"Акулов",
-		Location{
-			"Россия",
-			"Иваново",
-			"2-я Сосневская",
-			19,
-			0,
-			0,
-		},
-	})
-	if err != nil {
-		fmt.Println(err)
+	if err := db.Status().Err; err != nil {
+		fmt.Println("Error connecting to Reindex: ", err)
+		os.Exit(-1)
 	}
-	elem, found := db.Query("users").Where("ID", reindexer.EQ, 1).Get()
-	if found {
-		item := elem.(*User)
-		fmt.Println(*item)
+	// Проверка и создание коллекции persons, в случае, если она отсутствует
+	err := db.OpenNamespace("persons", reindexer.DefaultNamespaceOptions(), Person{})
+	if err != nil {
+		fmt.Println("Error creating namespace \"persons\": ", err)
 	}
 }
