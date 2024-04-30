@@ -3,46 +3,59 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	// Reindexer
 	"github.com/restream/reindexer/v3"
 	_ "github.com/restream/reindexer/v3/bindings/cproto"
 
+	// Для валидации json в post/put
+	"github.com/go-playground/validator"
+
 	// Echo для API
 	"github.com/labstack/echo/v4"
 )
 
 type Achievement struct {
-	Content	string		`reindex:"content" json:"content" binding:"required"`
+	Content	string		`reindex:"content" json:"content" validate:"required"`
 	Date	time.Time	`reindex:"date" json:"date"`
 }
 
 type Job struct {
-	StartedAt		time.Time		`reindex:"started_at" json:"started_at" binding:"required"`
-	EndedAt			time.Time		`reindex:"ended_at" json:"ended_at" binding:"gtfield=StartedAt"`
-	Name 			string			`reindex:"name" json:"name" binding:"required"`
-	Type 			string			`reindex:"type" json:"type" binding:"required"`
-	Position 		string 			`reindex:"position" json:"position" binding:"required"`
+	StartedAt		time.Time		`reindex:"started_at" json:"started_at" validate:"required"`
+	EndedAt			time.Time		`reindex:"ended_at" json:"ended_at" validate:"gtfield=StartedAt"`
+	Name 			string			`reindex:"name" json:"name" validate:"required"`
+	Type 			string			`reindex:"type" json:"type" validate:"required"`
+	Position 		string 			`reindex:"position" json:"position" validate:"required"`
 	DismissalReason	string			`reindex:"dissmisal_reason" json:"dismissal_reason"`
 	Achievements	[]Achievement	`reindex:"achievements" json:"achievements"`
 }
 
 type PersonPost struct {
-	FirstName	string		`reindex:"first_name" json:"first_name" binding:"required"`
-	LastName	string 		`reindex:"last_name" json:"last_name" binding:"required"`
-	Username	string		`reindex:"username,hash" json:"username" binding:"required"`
-	Birthdate	time.Time	`reindex:"birthdate" json:"birthdate" binding:"required"`
-	Profession	string		`reindex:"profession" json:"profession" binding:"required"`
-	Jobs		[]Job 		`reindex:"jobs" json:"jobs" binding:"required"`
+	FirstName	string		`reindex:"first_name" json:"first_name" validate:"required"`
+	LastName	string 		`reindex:"last_name" json:"last_name" validate:"required"`
+	Username	string		`reindex:"username,hash" json:"username" validate:"required"`
+	Birthdate	time.Time	`reindex:"birthdate" json:"birthdate" validate:"required"`
+	Profession	string		`reindex:"profession" json:"profession" validate:"required"`
+	Jobs		[]Job 		`reindex:"jobs" json:"jobs" validate:"required"`
 }
 
 type Person struct {
 	ID 			int64 		`reindex:"id,,pk" json:"_id"`
 	PersonPost
-	CreatedAt 	time.Time	`reindex:"created_at" json:"created_at"`
 	UpdatedAt	time.Time	`reindex:"updated_at" json:"updated_at"`
+}
+
+// Структуры для валидации запросов с json
+type PlaygroundValidator struct {
+	validator *validator.Validate
+}
+
+func (pv *PlaygroundValidator) Validate(i interface{}) error {
+	if err := pv.validator.Struct(i); err != nil {
+		return echo.NewHTTPError(400, err.Error())
+	}
+	return nil
 }
 
 var db *reindexer.Reindexer
@@ -58,13 +71,15 @@ func main() {
 	err := db.OpenNamespace("persons", reindexer.DefaultNamespaceOptions(), Person{})
 	if err != nil {
 		fmt.Println("Error creating namespace \"persons\": ", err)
+		os.Exit(-1)
 	}
 	// Создание и запуск роутера для API и CRUD
 	router := echo.New()
+	router.Validator = &PlaygroundValidator{validator: validator.New()}
 	router.GET("/persons", getPersons)
 	router.POST("/persons", postPerson)
 	router.GET("/persons/:id", getPerson)
-	router.PATCH("/persons/:id", updatePerson)
+	router.PUT("/persons/:id", putPerson)
 	router.DELETE("/persons/:id", deletePerson)
 	router.Logger.Fatal(router.Start(os.Getenv("API_ADDR")))
 }
@@ -72,34 +87,43 @@ func main() {
 func getPersons(c echo.Context) error {
 	p := 0; l := 10
 	if err := echo.QueryParamsBinder(c).Int("page", &p).Int("limit", &l).BindError(); err != nil {
-		return c.String(400, err.Error())
+		return echo.NewHTTPError(400, err.Error())
 	}
 	result, err := db.Query("persons").Limit(l).Offset(p*l).Exec().FetchAll()
 	if err != nil {
-		return c.String(500, fmt.Sprint("Error retrieving data: ", err))
+		return echo.NewHTTPError(500, fmt.Sprint("Error retrieving Person: ", err))
 	}
 	return c.JSON(200, result)
 }
 
 func postPerson(c echo.Context) error {
 	p := new(PersonPost)
-	if err := c.Bind(&p); err != nil { return err }
+	if err := c.Bind(p); err != nil { 
+		return echo.NewHTTPError(400, err.Error()) 
+	}
+	if err := c.Validate(p); err != nil {
+		return err
+	}
 	person := Person{
 		0,
 		*p,
 		time.Now().UTC(),
-		time.Now().UTC(),
 	}
-	if _, err := db.Insert("persons", &person, "ID=serial()"); err != nil {
-		return c.String(500, fmt.Sprint("Error creating new person: ", err.Error()))
+	_, err := db.Insert(
+		"persons",
+		&person,
+		"ID=serial()",
+	)
+	if err != nil {
+		return echo.NewHTTPError(500, fmt.Sprint("Error creating Person: ", err.Error()))
 	}
 	return c.JSON(200, person)
 }
 
 func getPerson(c echo.Context) error {
-	var id int
-	if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
-		return c.String(400, err.Error())
+	var id int64
+	if err := echo.PathParamsBinder(c).Int64("id", &id).BindError(); err != nil {
+		return echo.NewHTTPError(400, err.Error())
 	}
 	result, found := db.Query("persons").Where("_id", reindexer.EQ, id).Get()
 	if !found {
@@ -108,16 +132,36 @@ func getPerson(c echo.Context) error {
 	return c.JSON(200, result) 
 }
 
-func updatePerson(c echo.Context) error {
-	return c.String(500, "Doesn't Work")
+func putPerson(c echo.Context) error {
+	var id int64
+	if err := echo.PathParamsBinder(c).Int64("id", &id).BindError(); err != nil {
+		return echo.NewHTTPError(400, err.Error())
+	}
+	p := new(PersonPost)
+	if err := c.Bind(p); err != nil { 
+		return echo.NewHTTPError(400, err.Error()) 
+	}
+	person := Person{
+		id,
+		*p,
+		time.Now().UTC(),
+	}
+	_, err := db.Update(
+		"persons",
+		&person,
+	)
+	if err != nil {
+		return echo.NewHTTPError(500, fmt.Sprint("Error updating Person: ", err.Error()))
+	}
+	return c.JSON(200, person)
 }
 
 func deletePerson(c echo.Context) error {
-	var id int
-	if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
-		return c.String(400, err.Error())
+	var id int64
+	if err := echo.PathParamsBinder(c).Int64("id", &id).BindError(); err != nil {
+		return echo.NewHTTPError(400, err.Error())
 	}
-	if _, err := db.Query("persons").Where("_id", reindexer.EQ, id).Delete(); err != nil {
+	if err := db.Delete("persons", &Person{ID: int64(id)}); err != nil {
 		return c.String(500, fmt.Sprint("Error deleting document by ID: ", err.Error()))
 	}
 	return c.String(200, "Success")
