@@ -71,10 +71,12 @@ func main() {
 
 func getPersons(c echo.Context) error {
 	p := 0; l := 10
-	echo.QueryParamsBinder(c).Int("page", &p).Int("limit", &l)
-	result, found := db.Query("persons").Limit(l).Offset(p*l).Get()
-	if !found {
-		return c.String(404, "Not Found")
+	if err := echo.QueryParamsBinder(c).Int("page", &p).Int("limit", &l).BindError(); err != nil {
+		return c.String(400, err.Error())
+	}
+	result, err := db.Query("persons").Limit(l).Offset(p*l).Exec().FetchAll()
+	if err != nil {
+		return c.String(500, fmt.Sprint("Error retrieving data: ", err))
 	}
 	return c.JSON(200, result)
 }
