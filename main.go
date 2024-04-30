@@ -82,8 +82,7 @@ func getPersons(c echo.Context) error {
 }
 
 func postPerson(c echo.Context) error {
-	return c.String(500, "Doesn't Work")
-	/*p := new(PersonPost)
+	p := new(PersonPost)
 	if err := c.Bind(&p); err != nil { return err }
 	person := Person{
 		0,
@@ -91,10 +90,10 @@ func postPerson(c echo.Context) error {
 		time.Now().UTC(),
 		time.Now().UTC(),
 	}
-	if _, err := db.Insert("persons", person); err != nil {
-		return c.String(500, fmt.Sprint("Error creating new person: ", err))
+	if _, err := db.Insert("persons", &person, "ID=serial()"); err != nil {
+		return c.String(500, fmt.Sprint("Error creating new person: ", err.Error()))
 	}
-	return c.JSON(200, person)*/
+	return c.JSON(200, person)
 }
 
 func getPerson(c echo.Context) error {
