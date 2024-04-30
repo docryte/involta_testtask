@@ -98,9 +98,9 @@ func postPerson(c echo.Context) error {
 }
 
 func getPerson(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.String(400, fmt.Sprint("Bad ID: ", id))
+	var id int
+	if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
+		return c.String(400, err.Error())
 	}
 	result, found := db.Query("persons").Where("_id", reindexer.EQ, id).Get()
 	if !found {
@@ -114,9 +114,9 @@ func updatePerson(c echo.Context) error {
 }
 
 func deletePerson(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.String(400, fmt.Sprint("Bad ID: ", id))
+	var id int
+	if err := echo.PathParamsBinder(c).Int("id", &id).BindError(); err != nil {
+		return c.String(400, err.Error())
 	}
 	if _, err := db.Query("persons").Where("_id", reindexer.EQ, id).Delete(); err != nil {
 		return c.String(500, fmt.Sprint("Error deleting document by ID: ", err.Error()))
