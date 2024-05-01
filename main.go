@@ -25,18 +25,18 @@ import (
 
 type Job struct {
 	StartedAt		time.Time		`reindex:"started_at" json:"started_at" validate:"required"`
-	EndedAt			time.Time		`reindex:"ended_at" json:"ended_at" validate:"gtfield=StartedAt"`
+	EndedAt			time.Time		`reindex:"ended_at" json:"ended_at,omitempty" validate:"gtfield=StartedAt"`
 	Name 			string			`reindex:"name" json:"name" validate:"required"`
 	Type 			string			`reindex:"type" json:"type" validate:"required"`
 	Position 		string 			`reindex:"position" json:"position" validate:"required"`
-	DismissalReason	string			`reindex:"dissmisal_reason" json:"dismissal_reason"`
+	DismissalReason	string			`reindex:"dissmisal_reason" json:"dismissal_reason,omitempty"`
 }
 
 type PersonPost struct {
 	FirstName	string		`reindex:"first_name" json:"first_name" validate:"required"`
 	LastName	string 		`reindex:"last_name" json:"last_name" validate:"required"`
 	Username	string		`reindex:"username,hash" json:"username" validate:"required"`
-	Birthdate	time.Time	`reindex:"birthdate" json:"birthdate" validate:"required"`
+	Birthdate	time.Time	`reindex:"birthdate" json:"birthdate,omitempty"`
 	Profession	string		`reindex:"profession" json:"profession" validate:"required"`
 	Sort 		int			`reindex:"sort" json:"sort" validate:"required"`
 	Jobs		[]Job 		`reindex:"jobs" json:"jobs" validate:"required"`
@@ -57,6 +57,20 @@ type Person struct {
 	UpdatedAt	time.Time	`reindex:"updated_at" json:"updated_at"`
 }
 
+func (p *Person) Perform() {
+	fmt.Printf("%v %v Sort: %v\n", p.FirstName, p.LastName, p.Sort)
+}
+
+func SortPersons (ps []*Person) {
+	fmt.Println("Начало сортировки")
+	sort.SliceStable(
+		ps, 
+		func(i, j int) bool {
+			return ps[i].Sort > ps[j].Sort
+		},
+	)
+	fmt.Println("Конец сортировки")
+}
 
 /* 
 Структуры для валидации запросов с json
@@ -131,17 +145,15 @@ func getPersons(c echo.Context) error {
 	if iterator.Count() == 0 {
 		return echo.NewHTTPError(404, "Not Found")
 	}
-	persons := make([]*Person, iterator.Count())
+	var persons []*Person
 	for iterator.Next() {
 		persons = append(persons, iterator.Object().(*Person))
 	}
 	// Обратная сортировка по целочисленному полю Sort 
-	sort.SliceStable(
-		persons, 
-		func(i, j int) bool {
-			return persons[i].Sort > persons[j].Sort
-		},
-	)
+	go SortPersons(persons)
+	for i := range persons {
+		go persons[i].Perform()
+	}
 	return c.JSON(200, persons)
 }
 
