@@ -23,11 +23,6 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-type Achievement struct {
-	Content	string		`reindex:"content" json:"content" validate:"required"`
-	Date	time.Time	`reindex:"date" json:"date"`
-}
-
 type Job struct {
 	StartedAt		time.Time		`reindex:"started_at" json:"started_at" validate:"required"`
 	EndedAt			time.Time		`reindex:"ended_at" json:"ended_at" validate:"gtfield=StartedAt"`
@@ -35,8 +30,6 @@ type Job struct {
 	Type 			string			`reindex:"type" json:"type" validate:"required"`
 	Position 		string 			`reindex:"position" json:"position" validate:"required"`
 	DismissalReason	string			`reindex:"dissmisal_reason" json:"dismissal_reason"`
-	Achievements	[]Achievement	`reindex:"achievements" json:"achievements"`
-	Sort 			int				`reindex:"sort" json:"sort" validate:"required"`
 }
 
 type PersonPost struct {
@@ -45,6 +38,7 @@ type PersonPost struct {
 	Username	string		`reindex:"username,hash" json:"username" validate:"required"`
 	Birthdate	time.Time	`reindex:"birthdate" json:"birthdate" validate:"required"`
 	Profession	string		`reindex:"profession" json:"profession" validate:"required"`
+	Sort 		int			`reindex:"sort" json:"sort" validate:"required"`
 	Jobs		[]Job 		`reindex:"jobs" json:"jobs" validate:"required"`
 }
 
@@ -63,15 +57,6 @@ type Person struct {
 	UpdatedAt	time.Time	`reindex:"updated_at" json:"updated_at"`
 }
 
-// Отдельная функция для сортировки массива документов первого уровня вложенности
-func (p *Person) SortJobs() {
-	sort.SliceStable(
-		p.Jobs, 
-		func(i, j int) bool {
-			return p.Jobs[i].Sort > p.Jobs[j].Sort
-		},
-	)
-}
 
 /* 
 Структуры для валидации запросов с json
@@ -142,11 +127,22 @@ func getPersons(c echo.Context) error {
 	if err := echo.QueryParamsBinder(c).Int("page", &p).Int("limit", &l).BindError(); err != nil {
 		return echo.NewHTTPError(400, err.Error())
 	}
-	result, err := reindexer_db.Query("persons").Limit(l).Offset(p*l).Exec().FetchAll()
-	if err != nil {
-		return echo.NewHTTPError(500, fmt.Sprint("Error retrieving Person: ", err))
+	iterator := reindexer_db.Query("persons").Limit(l).Offset(p*l).Exec()
+	if iterator.Count() == 0 {
+		return echo.NewHTTPError(404, "Not Found")
 	}
-	return c.JSON(200, result)
+	persons := make([]*Person, iterator.Count())
+	for iterator.Next() {
+		persons = append(persons, iterator.Object().(*Person))
+	}
+	// Обратная сортировка по целочисленному полю Sort 
+	sort.SliceStable(
+		persons, 
+		func(i, j int) bool {
+			return persons[i].Sort > persons[j].Sort
+		},
+	)
+	return c.JSON(200, persons)
 }
 
 func postPerson(c echo.Context) error {
@@ -193,8 +189,6 @@ func getPerson(c echo.Context) error {
 			return echo.NewHTTPError(404, "Not Found")
 		}
 		person = result.(*Person)
-		// Сортировка по полю sort документов первого уровня вложенности
-		person.SortJobs()
 		// Кэшируем объект уже после сортировки
 		redis_cache.Set(&cache.Item{
 			Ctx: 	context.Background(),
