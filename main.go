@@ -35,6 +35,7 @@ type Job struct {
 	Position 		string 			`reindex:"position" json:"position" validate:"required"`
 	DismissalReason	string			`reindex:"dissmisal_reason" json:"dismissal_reason"`
 	Achievements	[]Achievement	`reindex:"achievements" json:"achievements"`
+	Sort 			int				`reindex:"sort" json:"sort" validate:"required"`
 }
 
 type PersonPost struct {
