@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -18,8 +19,8 @@ import (
 	"github.com/labstack/echo/v4"
 
 	// Redis для кэша
-	"github.com/redis/go-redis/v9"
 	"github.com/go-redis/cache/v9"
+	"github.com/redis/go-redis/v9"
 )
 
 type Achievement struct {
@@ -60,6 +61,16 @@ type Person struct {
 	ID 			int64 		`reindex:"id,,pk" json:"_id"`
 	PersonPost
 	UpdatedAt	time.Time	`reindex:"updated_at" json:"updated_at"`
+}
+
+// Отдельная функция для сортировки массива документов первого уровня вложенности
+func (p *Person) SortJobs() {
+	sort.SliceStable(
+		p.Jobs, 
+		func(i, j int) bool {
+			return p.Jobs[i].Sort > p.Jobs[j].Sort
+		},
+	)
 }
 
 /* 
@@ -182,6 +193,9 @@ func getPerson(c echo.Context) error {
 			return echo.NewHTTPError(404, "Not Found")
 		}
 		person = result.(*Person)
+		// Сортировка по полю sort документов первого уровня вложенности
+		person.SortJobs()
+		// Кэшируем объект уже после сортировки
 		redis_cache.Set(&cache.Item{
 			Ctx: 	context.Background(),
 			Key: 	string(rune(id)),
