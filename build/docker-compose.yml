@@ -1,0 +1,24 @@
+name: "testtask"
+
+services:
+  reindexer:
+    image: "reindexer/reindexer:latest"
+
+  redis:
+    image: "redis:latest"
+
+  web:
+    build: 
+      context: ../
+      dockerfile: build/Dockerfile
+    command: /app/cmd/main/main
+    depends_on:
+      - redis
+      - reindexer
+    ports:
+      - 80:80
+    environment:
+      - REDIS_URL=redis:6379
+      - REDIS_PASSWORD=
+      - REDIS_DATABASE=0
+      - REINDEXER_URL=cproto://reindexer:6534/db
