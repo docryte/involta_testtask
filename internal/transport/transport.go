@@ -20,6 +20,5 @@ func StartRouting(rdb *reindexer.Reindexer) {
 	router.GET("/persons/:id", getPerson)
 	router.PUT("/persons/:id", putPerson)
 	router.DELETE("/persons/:id", deletePerson)
-	router.Logger.Fatal(router.Start(":8000"))
-
+	router.Logger.Fatal(router.Start(":80"))
 }
