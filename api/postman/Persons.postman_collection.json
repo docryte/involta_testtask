@@ -1,0 +1,374 @@
+{
+	"info": {
+		"_postman_id": "b57f376c-3cdb-4f1a-b0ab-7d0f08f1dc9e",
+		"name": "Persons",
+		"description": "Простой CRUD для коллекции Persons в Reindexer",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29139545"
+	},
+	"item": [
+		{
+			"name": "Get Persons",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_ADDR}}/persons?limit=10&page=0",
+					"host": [
+						"{{API_ADDR}}"
+					],
+					"path": [
+						"persons"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "page",
+							"value": "0"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Persons",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_ADDR}}/persons?limit=10&page=0",
+							"host": [
+								"{{API_ADDR}}"
+							],
+							"path": [
+								"persons"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "page",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 02 May 2024 13:04:01 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "435"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"_id\": 3,\n        \"first_name\": \"Фёдор\",\n        \"last_name\": \"Акулов\",\n        \"username\": \"docryte\",\n        \"birthdate\": \"2004-11-09T00:00:00Z\",\n        \"profession\": \"Backend-программист\",\n        \"sort\": 1,\n        \"jobs\": [\n            {\n                \"started_at\": \"2023-08-01T00:00:00Z\",\n                \"ended_at\": \"2024-05-02T00:00:00Z\",\n                \"name\": \"Qrooto.com\",\n                \"type\": \"Трудоустройство\",\n                \"position\": \"Разработчик API личного кабинета\"\n            }\n        ],\n        \"updated_at\": \"2024-05-02T13:03:34.497493262Z\"\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "Create Person",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"sort\": 1,\r\n    \"first_name\": \"Фёдор\",\r\n    \"last_name\": \"Акулов\",\r\n    \"username\": \"docryte\",\r\n    \"birthdate\": \"2004-11-09T00:00:00Z\",\r\n    \"profession\": \"Backend-программист\",\r\n    \"jobs\": [\r\n        {\r\n            \"started_at\": \"2023-08-01T00:00:00Z\",\r\n            \"ended_at\": \"2024-05-02T00:00:00Z\",\r\n            \"name\": \"Qrooto.com\",\r\n            \"type\": \"Трудоустройство\",\r\n            \"position\": \"Разработчик API личного кабинета\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_ADDR}}/persons",
+					"host": [
+						"{{API_ADDR}}"
+					],
+					"path": [
+						"persons"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Person",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sort\": 1,\r\n    \"first_name\": \"Фёдор\",\r\n    \"last_name\": \"Акулов\",\r\n    \"username\": \"docryte\",\r\n    \"birthdate\": \"2004-11-09T00:00:00Z\",\r\n    \"profession\": \"Backend-программист\",\r\n    \"jobs\": [\r\n        {\r\n            \"started_at\": \"2023-08-01T00:00:00Z\",\r\n            \"ended_at\": \"2024-05-02T00:00:00Z\",\r\n            \"name\": \"Qrooto.com\",\r\n            \"type\": \"Трудоустройство\",\r\n            \"position\": \"Разработчик API личного кабинета\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_ADDR}}/persons",
+							"host": [
+								"{{API_ADDR}}"
+							],
+							"path": [
+								"persons"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 02 May 2024 13:03:34 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "433"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"_id\": 3,\n    \"first_name\": \"Фёдор\",\n    \"last_name\": \"Акулов\",\n    \"username\": \"docryte\",\n    \"birthdate\": \"2004-11-09T00:00:00Z\",\n    \"profession\": \"Backend-программист\",\n    \"sort\": 1,\n    \"jobs\": [\n        {\n            \"started_at\": \"2023-08-01T00:00:00Z\",\n            \"ended_at\": \"2024-05-02T00:00:00Z\",\n            \"name\": \"Qrooto.com\",\n            \"type\": \"Трудоустройство\",\n            \"position\": \"Разработчик API личного кабинета\"\n        }\n    ],\n    \"updated_at\": \"2024-05-02T13:03:34.497493262Z\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Single Person",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{API_ADDR}}/persons/:id",
+					"host": [
+						"{{API_ADDR}}"
+					],
+					"path": [
+						"persons",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Single Person",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{API_ADDR}}/persons/:id",
+							"host": [
+								"{{API_ADDR}}"
+							],
+							"path": [
+								"persons",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 02 May 2024 13:06:12 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "433"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"_id\": 3,\n    \"first_name\": \"Фёдор\",\n    \"last_name\": \"Акулов\",\n    \"username\": \"docryte\",\n    \"birthdate\": \"2004-11-09T00:00:00Z\",\n    \"profession\": \"Backend-программист\",\n    \"sort\": 1,\n    \"jobs\": [\n        {\n            \"started_at\": \"2023-08-01T00:00:00Z\",\n            \"ended_at\": \"2024-05-02T00:00:00Z\",\n            \"name\": \"Qrooto.com\",\n            \"type\": \"Трудоустройство\",\n            \"position\": \"Разработчик API личного кабинета\"\n        }\n    ],\n    \"updated_at\": \"2024-05-02T13:03:34.497493262Z\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Update Single Person",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"sort\": 1,\r\n    \"first_name\": \"Фёдор\",\r\n    \"last_name\": \"Акулов\",\r\n    \"username\": \"docryte\",\r\n    \"birthdate\": \"2004-11-09T00:00:00Z\",\r\n    \"profession\": \"Backend-программист\",\r\n    \"jobs\": [\r\n        {\r\n            \"started_at\": \"2023-08-01T00:00:00Z\",\r\n            \"ended_at\": \"2024-05-02T00:00:00Z\",\r\n            \"name\": \"Qrooto.com\",\r\n            \"type\": \"Трудоустройство\",\r\n            \"position\": \"Разработчик API личного кабинета\"\r\n        },\r\n        {\r\n            \"started_at\": \"2024-05-02T00:00:00Z\",\r\n            \"name\": \"Involta\",\r\n            \"type\": \"Трудоустройство\",\r\n            \"position\": \"Backend-разработчик\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{API_ADDR}}/persons/:id",
+					"host": [
+						"{{API_ADDR}}"
+					],
+					"path": [
+						"persons",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Update Single Person",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"sort\": 1,\r\n    \"first_name\": \"Фёдор\",\r\n    \"last_name\": \"Акулов\",\r\n    \"username\": \"docryte\",\r\n    \"birthdate\": \"2004-11-09T00:00:00Z\",\r\n    \"profession\": \"Backend-программист\",\r\n    \"jobs\": [\r\n        {\r\n            \"started_at\": \"2023-08-01T00:00:00Z\",\r\n            \"ended_at\": \"2024-05-02T00:00:00Z\",\r\n            \"name\": \"Qrooto.com\",\r\n            \"type\": \"Трудоустройство\",\r\n            \"position\": \"Разработчик API личного кабинета\"\r\n        },\r\n        {\r\n            \"started_at\": \"2024-05-02T00:00:00Z\",\r\n            \"name\": \"Involta\",\r\n            \"type\": \"Трудоустройство\",\r\n            \"position\": \"Backend-разработчик\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{API_ADDR}}/persons/:id",
+							"host": [
+								"{{API_ADDR}}"
+							],
+							"path": [
+								"persons",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 02 May 2024 13:06:30 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "606"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"_id\": 1,\n    \"first_name\": \"Фёдор\",\n    \"last_name\": \"Акулов\",\n    \"username\": \"docryte\",\n    \"birthdate\": \"2004-11-09T00:00:00Z\",\n    \"profession\": \"Backend-программист\",\n    \"sort\": 1,\n    \"jobs\": [\n        {\n            \"started_at\": \"2023-08-01T00:00:00Z\",\n            \"ended_at\": \"2024-05-02T00:00:00Z\",\n            \"name\": \"Qrooto.com\",\n            \"type\": \"Трудоустройство\",\n            \"position\": \"Разработчик API личного кабинета\"\n        },\n        {\n            \"started_at\": \"2024-05-02T00:00:00Z\",\n            \"ended_at\": \"0001-01-01T00:00:00Z\",\n            \"name\": \"Involta\",\n            \"type\": \"Трудоустройство\",\n            \"position\": \"Backend-разработчик\"\n        }\n    ],\n    \"updated_at\": \"2024-05-02T13:06:30.737515781Z\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Delete Single Person",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{API_ADDR}}/persons/:id",
+					"host": [
+						"{{API_ADDR}}"
+					],
+					"path": [
+						"persons",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Delete Single Person",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{API_ADDR}}/persons/:id",
+							"host": [
+								"{{API_ADDR}}"
+							],
+							"path": [
+								"persons",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/plain; charset=UTF-8"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 02 May 2024 13:01:55 GMT"
+						},
+						{
+							"key": "Content-Length",
+							"value": "7"
+						}
+					],
+					"cookie": [],
+					"body": "Success"
+				}
+			]
+		}
+	]
+}
